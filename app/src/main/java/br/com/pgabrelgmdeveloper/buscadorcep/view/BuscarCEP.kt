@@ -1,14 +1,11 @@
 package br.com.pgabrelgmdeveloper.buscadorcep.view
 
-import androidx.compose.foundation.layout.Box
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -22,32 +19,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import br.com.pgabrelgmdeveloper.buscadorcep.components.CustomButtom
 import br.com.pgabrelgmdeveloper.buscadorcep.components.CustomOutlinedTextField
+import br.com.pgabrelgmdeveloper.buscadorcep.listners.ResponseApi
 import br.com.pgabrelgmdeveloper.buscadorcep.ui.theme.Purple80
+import br.com.pgabrelgmdeveloper.buscadorcep.viewmodel.BuscarCepViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BuscarCEP(navController: NavController) {
-    var cep by remember{
+fun BuscarCEP(navController: NavController, viewModel: BuscarCepViewModel) {
+    val context = LocalContext.current
+    var inputCep by remember{
         mutableStateOf("")
     }
-    var logradouro by remember{
+    var logradouroInput by remember{
         mutableStateOf("")
     }
-    var bairro by remember{
+    var bairroInput by remember{
         mutableStateOf("")
     }
-    var cidade by remember{
+    var cidadeInput by remember{
         mutableStateOf("")
     }
-    var estado by remember{
+    var estadoInput by remember{
         mutableStateOf("")
     }
 
@@ -72,53 +71,67 @@ fun BuscarCEP(navController: NavController) {
                     modifier = Modifier
                     .weight(1f)
                     .padding(10.dp, 0.dp) ,
-                    value = cep,
+                    value = inputCep,
                     changeValue = { value ->
-                                  cep = value
+                                  inputCep = value
                     },
                     KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
                 CustomButtom(title = "Buscar Cep", modifier = Modifier
                     .weight(1f)
                     .padding(10.dp, 8.dp)
-                    .height(54.dp)) {
-                    
-                }
+                    .height(54.dp), onClick = {
+                        viewModel.responseApi(inputCep, object : ResponseApi {
+                            override fun onSuccess(
+                                logradouro: String,
+                                bairro: String,
+                                cidade: String,
+                                estado: String
+                            ) {
+                                logradouroInput =logradouro
+                                bairroInput = bairro
+                                cidadeInput = cidade
+                                estadoInput = estado
+                            }
+
+                            override fun onFailure(error: String) {
+                               Toast.makeText(context,error,Toast.LENGTH_SHORT).show()
+                            }
+
+                        })
+                })
             }
             CustomOutlinedTextField(label = "Logradouro", modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp),
-                value = logradouro,  changeValue = { value ->
-                    logradouro = value
+                value = logradouroInput,  changeValue = { value ->
+                    logradouroInput = value
                 },
                 KeyboardOptions(keyboardType = KeyboardType.Text))
 
             CustomOutlinedTextField(label = "Bairro", modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp),
-                value = bairro,
+                value = bairroInput,
                 changeValue = { value ->
-                    bairro = value
+                    bairroInput = value
                 },
                 KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
             CustomOutlinedTextField(label = "Cidade", modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp, 0.dp) , value = cidade,  changeValue = { value ->
-                cidade = value
+                .padding(10.dp, 0.dp) , value = cidadeInput,  changeValue = { value ->
+                cidadeInput = value
             },
                 KeyboardOptions(keyboardType = KeyboardType.Text))
 
 
             CustomOutlinedTextField(label = "Estado", modifier = Modifier.fillMaxWidth()
 
-                .padding(10.dp, 0.dp), value = estado, changeValue = { value ->
-                estado = value
+                .padding(10.dp, 0.dp), value = estadoInput, changeValue = { value ->
+                estadoInput = value
             },
                 KeyboardOptions(keyboardType = KeyboardType.Text))
-
-
-
                 CustomButtom(title = "Avancar", modifier = Modifier.padding(10.dp, 8.dp)
                     .height(54.dp)) {
             }
@@ -128,8 +141,3 @@ fun BuscarCEP(navController: NavController) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun t(){
-    BuscarCEP(navController = rememberNavController())
-}

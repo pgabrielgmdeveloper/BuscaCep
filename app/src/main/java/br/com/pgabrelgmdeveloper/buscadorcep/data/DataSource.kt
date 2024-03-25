@@ -8,15 +8,16 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
-class DataSource {
+class DataSource @Inject constructor() {
     private val retrofit: ViaCep = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("https://viacep.com.br/")
         .build()
         .create(ViaCep::class.java)
 
-    fun ResponseApi(cep: String, responseApi: ResponseApi) {
+    fun responseApi(cep: String, responseApi: ResponseApi) {
         if (cep.isEmpty()){
             responseApi.onFailure("Preenchar o campo CEP !")
         }else {
@@ -29,7 +30,7 @@ class DataSource {
                         val uf = response.body()?.uf.toString()
 
                         responseApi.onSuccess(logradouro,bairro,cidade,uf)
-                        
+
                     }else {
                         responseApi.onFailure("CEP invalido !")
                     }
